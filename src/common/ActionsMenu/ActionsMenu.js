@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import PropTypes from 'prop-types'
 import { isEmpty } from 'lodash'
 import classnames from 'classnames'
@@ -14,14 +15,14 @@ const ActionsMenu = ({ dataItem, menu, time }) => {
   const [isIconDisplayed, setIsIconDisplayed] = useState(false)
   const [actionMenu, setActionMenu] = useState(menu)
   const [renderMenu, setRenderMenu] = useState(false)
-  const [openToBottom, setOpenToBottom] = useState(false)
+  const [style, setStyle] = useState({})
   const actionMenuRef = useRef()
   const dropDownMenuRef = useRef()
   const dropDownMenuClassNames = classnames(
     'actions-menu__body',
-    openToBottom && 'open-to-bottom',
     isShowMenu && 'show'
   )
+  const offset = 35
   let idTimeout = null
 
   useEffect(() => {
@@ -34,14 +35,40 @@ const ActionsMenu = ({ dataItem, menu, time }) => {
     setIsIconDisplayed(actionMenu.some(menuItem => menuItem.icon))
   }, [actionMenu])
 
-  const showActionsList = () => {
-    setIsShowMenu(show => !show)
-    setOpenToBottom(
-      dropDownMenuRef.current?.offsetHeight +
-        actionMenuRef.current?.getBoundingClientRect().bottom <
-        window.innerHeight
-    )
-  }
+  const showActionsList = useCallback(
+    event => {
+      setIsShowMenu(show => !show)
+      let { height, top, bottom } =
+        actionMenuRef?.current?.getBoundingClientRect() ?? {}
+      const {
+        height: actionMenuHeight,
+        width: actionMenuWidth
+      } = dropDownMenuRef.current?.getBoundingClientRect() ?? {
+        height: 0,
+        width: 0
+      }
+      const leftPosition =
+        event.x - (event.x + actionMenuWidth - window.innerWidth + offset)
+      const left =
+        event.x + actionMenuWidth > window.innerWidth
+          ? leftPosition > offset
+            ? leftPosition
+            : offset
+          : event.x
+      if (top + height + offset + actionMenuHeight >= window.innerHeight) {
+        setStyle({
+          top: bottom - height - actionMenuHeight,
+          left: left
+        })
+      } else {
+        setStyle({
+          top: top + height,
+          left: left
+        })
+      }
+    },
+    [setIsShowMenu]
+  )
 
   const handleMouseLeave = () => {
     if (isShowMenu) {
@@ -58,6 +85,17 @@ const ActionsMenu = ({ dataItem, menu, time }) => {
     if (idTimeout) clearTimeout(idTimeout)
   }
 
+  useEffect(() => {
+    const node = actionMenuRef.current
+    if (node) {
+      node.addEventListener('click', showActionsList)
+
+      return () => {
+        node.removeEventListener('click', showActionsList)
+      }
+    }
+  }, [showActionsList])
+
   return (
     <div
       className="actions-menu__container"
@@ -65,29 +103,34 @@ const ActionsMenu = ({ dataItem, menu, time }) => {
       onMouseOver={handleMouseOver}
       ref={actionMenuRef}
     >
-      <button onClick={showActionsList}>
+      <button>
         <ActionMenu />
       </button>
-      {renderMenu && (
-        <div
-          data-testid="actions-drop-down-menu"
-          className={dropDownMenuClassNames}
-          onClick={() => setIsShowMenu(false)}
-          ref={dropDownMenuRef}
-        >
-          {actionMenu.map(
-            menuItem =>
-              !menuItem.hidden && (
-                <ActionsMenuItem
-                  dataItem={dataItem}
-                  isIconDisplayed={isIconDisplayed}
-                  key={menuItem.label}
-                  menuItem={menuItem}
-                />
-              )
-          )}
-        </div>
-      )}
+      {renderMenu &&
+        createPortal(
+          <div
+            data-testid="actions-drop-down-menu"
+            className={dropDownMenuClassNames}
+            onClick={() => setIsShowMenu(false)}
+            ref={dropDownMenuRef}
+            style={{
+              ...style
+            }}
+          >
+            {actionMenu.map(
+              menuItem =>
+                !menuItem.hidden && (
+                  <ActionsMenuItem
+                    dataItem={dataItem}
+                    isIconDisplayed={isIconDisplayed}
+                    key={menuItem.label}
+                    menuItem={menuItem}
+                  />
+                )
+            )}
+          </div>,
+          document.getElementById('overlay_container')
+        )}
     </div>
   )
 }
