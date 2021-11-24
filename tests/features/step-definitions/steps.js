@@ -372,7 +372,7 @@ Then(
 )
 
 Then(
-  'verify {string} element on {string} wizard should contains {string}.{string}',
+  'verify {string} dropdown element on {string} wizard should contains {string}.{string}',
   async function(dropdown, wizard, constStorage, constValue) {
     await openDropdown(this.driver, pageObjects[wizard][dropdown])
     await checkDropdownOptions(

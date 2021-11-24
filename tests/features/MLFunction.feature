@@ -678,7 +678,7 @@ Feature: ML Functions
         And wait load page
         When click on cell with row index 1 in "name" column in "Functions_Table" table on "ML_Functions" wizard
         Then verify "Action_Menu" element visibility on "ML_Function_Info_Pane" wizard
-        Then verify "Action_Menu" element on "ML_Function_Info_Pane" wizard should contains "ML_Functions_Tab"."Common_Action_Menu_Options"
+        Then verify "Action_Menu" dropdown element on "ML_Function_Info_Pane" wizard should contains "ML_Functions_Tab"."Common_Action_Menu_Options"
 
     @passive
     Scenario: Verify Edit action visibility in Item infopane for Serving function
@@ -690,7 +690,7 @@ Feature: ML Functions
         And wait load page
         When click on cell with row index 9 in "name" column in "Functions_Table" table on "ML_Functions" wizard
         Then verify "Action_Menu" element visibility on "ML_Function_Info_Pane" wizard
-        Then verify "Action_Menu" element on "ML_Function_Info_Pane" wizard should contains "ML_Functions_Tab"."Serving_Action_Menu_Options"
+        Then verify "Action_Menu" dropdown element on "ML_Function_Info_Pane" wizard should contains "ML_Functions_Tab"."Serving_Action_Menu_Options"
 
     @passive
     Scenario: Verify all mandatory component on Edit Function sidebar
