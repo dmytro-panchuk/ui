@@ -12,6 +12,10 @@ module.exports = {
       'Analysis'
     ]
   },
+  ML_Functions_Tab: {
+    Common_Action_Menu_Options: ['View YAML', 'Edit', 'Delete'],
+    Serving_Action_Menu_Options: ['View YAML', 'Delete']
+  },
   ML_Function_Info_Pane: {
     Tab_List: ['Overview', 'Code', 'Build Log'],
     Overview_Headers: [

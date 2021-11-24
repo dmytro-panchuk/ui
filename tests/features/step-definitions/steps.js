@@ -371,6 +371,22 @@ Then(
   }
 )
 
+Then(
+  'verify {string} element on {string} wizard should contains {string}.{string}',
+  async function(dropdown, wizard, constStorage, constValue) {
+    await openDropdown(this.driver, pageObjects[wizard][dropdown])
+    await checkDropdownOptions(
+      this.driver,
+      pageObjects[wizard][dropdown],
+      pageObjectsConsts[constStorage][constValue]
+    )
+    await clickNearComponent(
+      this.driver,
+      pageObjects[wizard][dropdown]['open_button']
+    )
+  }
+)
+
 Then('verify {string} element visibility on {string} wizard', async function(
   component,
   wizard

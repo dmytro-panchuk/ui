@@ -1,3 +1,12 @@
+import { expect } from 'chai'
+import { differenceWith, isEqual } from 'lodash'
+
+async function getOptionValues(driver, options) {
+  return await driver.findElements(options).then(function(elements) {
+    return Promise.all(elements.map(element => element.getText()))
+  })
+}
+
 const action = {
   openActionMenu: async function(driver, actionMenu) {
     const element = await driver.findElement(actionMenu.open_button)
@@ -14,6 +23,10 @@ const action = {
         }
       })
     }
+  },
+  checkActionMenuOptions: async function(driver, actionMenu, values) {
+    const options = await getOptionValues(driver, actionMenu.options)
+    expect(differenceWith(options, values, isEqual).length).equal(0)
   }
 }
 

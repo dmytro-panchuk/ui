@@ -66,7 +66,12 @@ module.exports = {
 
     return structure
   },
-  generateLabelGroup: function(root, label = false, hint = false) {
+  generateLabelGroup: function(
+    root,
+    label = false,
+    hintButton = false,
+    hint = false
+  ) {
     const structure = { elements: {} }
     structure.root = root
 
@@ -74,10 +79,14 @@ module.exports = {
       ? (structure.elements.label = label)
       : (structure.elements.label = '.data-ellipsis')
 
+    if (hintButton) {
+      typeof hintButton === 'string'
+        ? (structure.elements.hintButton = hintButton)
+        : (structure.elements.hintButton = 'div.tip-container svg')
+    }
+
     if (hint) {
-      typeof hint === 'string'
-        ? (structure.elements.hint = hint)
-        : (structure.elements.hint = 'div.tip-container svg')
+      structure.elements.hint = hint
     }
 
     return structure

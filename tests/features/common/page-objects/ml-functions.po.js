@@ -5,8 +5,10 @@ import commonTable from '../components/table.component'
 import actionMenu from '../components/action-menu.component'
 import {
   generateCheckboxGroup,
-  generateInputGroup
+  generateInputGroup,
+  generateLabelGroup
 } from '../../common-tools/common-tools'
+import labelComponent from '../components/label.component'
 
 const actionMenuStructure = {
   root: 'div.actions-menu__container',
@@ -39,7 +41,15 @@ const functionsTable = {
         name: '.table-body__cell:nth-of-type(1) a .item-name span',
         tag: '.table-body__cell:nth-of-type(1) a .item-tag span',
         status: '.table-body__cell:nth-of-type(1) .status i',
-        kind: '.table-body__cell:nth-of-type(2) svg',
+        kind: {
+          componentType: labelComponent,
+          structure: generateLabelGroup(
+            '.table-body__cell:nth-of-type(2)',
+            '.data-ellipsis',
+            true,
+            '.tooltip .tooltip__text span'
+          )
+        },
         hash: '.table-body__cell:nth-of-type(3) .data-ellipsis span',
         updated: '.table-body__cell:nth-of-type(4) .data-ellipsis',
         command: '.table-body__cell:nth-of-type(5) .data-ellipsis',
