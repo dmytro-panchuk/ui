@@ -72,6 +72,12 @@ const jobTemplate = { kind: 'run', metadata: {}, spec: {}, status: {} }
 const projectExistsConflict = {
   detail: "MLRunConflictError('Conflict - Project already exists')"
 }
+const projectsLimitReachedConflict = {
+  detail: {
+    reason:
+      "MLRunHTTPError(\"405 Client Error: Method Not Allowed for url: https://dashboard.default-tenant.app.vmdev2.lab.iguazeng.com/api/projects: Failed creating project in Iguazio: [{'status': 405, 'detail': 'Resource limit reached. Cannot create more records'}]\")"
+  }
+}
 
 // Mock consts
 const mockHome = process.cwd() + '/tests/mockServer'
@@ -187,8 +193,10 @@ function createNewProject(req, res) {
   const collectedProjects = projects.projects.filter(
     project => project.metadata.name === req.body.metadata.name
   )
-
-  if (!collectedProjects.length) {
+  if (projects.projects.length > 50) {
+    res.statusCode = 405
+    data = projectsLimitReachedConflict
+  } else if (!collectedProjects.length) {
     const project = cloneDeep(projectTemplate)
     project.metadata.name = req.body.metadata.name
     project.metadata.created = currentDate.toISOString()

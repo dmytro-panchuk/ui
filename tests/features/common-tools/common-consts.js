@@ -264,7 +264,8 @@ module.exports = {
     Error_Message: '“To” must be later than “From”'
   },
   Error_Messages: {
-    Create_New_Project: /Project name "[^"]+[$"] already exists/
+    Project_Already_Exists: /Project name "[^"]+[$"] already exists/,
+    Projects_Limit_Reached: 'Resource limit reached. Cannot create more records'
   },
   Dropdown_Options: {
     Tag_Filer_Options: ['sAll', 'latest'],

@@ -142,3 +142,15 @@ Feature: MLRun Projects Page
         Then verify if "View_YAML" popup dialog appears
         Then verify "Cross_Cancel_Button" element visibility on "View_YAML" wizard
         Then verify "YAML_Modal_Container" element visibility on "View_YAML" wizard
+
+    @danger
+#   Run this test case only with mocked backend!!!
+    Scenario: Check projects limit message
+        Then create up to limit projects with code 200
+        Given open url
+        And wait load page
+        Then click on "New_Project_Button" element on "Projects" wizard
+        Then type into "Name_Input" on "Create_New_Project" popup dialog "default" value
+        Then click on "Create_Button" element on "Create_New_Project" wizard
+        Then "Error_Message" component on "Create_New_Project" should contains "Error_Messages"."Projects_Limit_Reached"
+        And clear backend

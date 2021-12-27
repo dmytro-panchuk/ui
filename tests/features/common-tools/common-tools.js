@@ -150,30 +150,18 @@ module.exports = {
     )
   },
   clearBackendAfterTest: function(items) {
-    Object.keys(items).forEach(key => {
-      switch (key) {
+    items.forEach(item => {
+      switch (item.type) {
         case 'project':
-          return deleteAPIMLProject(items[key], 204)
+          return deleteAPIMLProject(item.name, 204)
         case 'featureSet':
-          return deleteAPIFeatureSet(
-            items[key].projectName,
-            items[key].itemName,
-            204
-          )
+          return deleteAPIFeatureSet(item.project, item.name, 204)
         case 'featureVector':
-          return deleteAPIFeatureVector(
-            items[key].projectName,
-            items[key].itemName,
-            204
-          )
+          return deleteAPIFeatureVector(item.project, item.name, 204)
         case 'function':
-          return deleteAPIFunction(
-            items[key].projectName,
-            items[key].itemName,
-            204
-          )
+          return deleteAPIFunction(item.project, item.name, 204)
         case 'job':
-          return deleteAPIJob(items[key].projectName, items[key].itemName, 204)
+          return deleteAPIJob(item.project, item.name, 204)
         default:
           return null
       }

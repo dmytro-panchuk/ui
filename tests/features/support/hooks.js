@@ -5,6 +5,7 @@ import { clearBackendAfterTest } from '../common-tools/common-tools'
 
 Before(async function() {
   await this.driver.manage().window()
+  this.createdItems = []
 })
 
 After(async function(testCase) {
@@ -12,7 +13,7 @@ After(async function(testCase) {
     var stream = await this.driver.takeScreenshot()
     await this.attach(stream, 'base64:image/png')
 
-    await clearBackendAfterTest(this.parameters)
+    await clearBackendAfterTest(this.createdItems)
   }
   let logs = []
   if (browser === 'chrome') {
