@@ -75,8 +75,6 @@ import {
   selectOptionInActionMenu
 } from '../common/actions/action-menu.action'
 
-import { clearBackendAfterTest } from '../common-tools/common-tools'
-
 Given('open url', async function() {
   await navigateToPage(this.driver, `http://${test_url}:${test_port}`)
 })
@@ -858,8 +856,4 @@ Then('create up to limit projects with code {int}', async function(status) {
     await createAPIMLProject(name, status)
     this.createdItems.push({ name, type: 'project' })
   }
-})
-
-Then('clear backend', async function() {
-  await clearBackendAfterTest(this.createdItems)
 })

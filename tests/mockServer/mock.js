@@ -75,7 +75,8 @@ const projectExistsConflict = {
 const projectsLimitReachedConflict = {
   detail: {
     reason:
-      "MLRunHTTPError(\"405 Client Error: Method Not Allowed for url: https://dashboard.default-tenant.app.vmdev2.lab.iguazeng.com/api/projects: Failed creating project in Iguazio: [{'status': 405, 'detail': 'Resource limit reached. Cannot create more records'}]\")"
+      "MLRunHTTPError(\"405 Client Error: Method Not Allowed for url: https://dashboard.default-tenant.app.vmdev2.lab.iguazeng.com/api/projects: " +
+        "Failed creating project in Iguazio: [{'status': 405, 'detail': 'Resource limit reached. Cannot create more records'}]\")"
   }
 }
 

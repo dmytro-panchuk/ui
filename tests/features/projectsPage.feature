@@ -150,7 +150,6 @@ Feature: MLRun Projects Page
         Given open url
         And wait load page
         Then click on "New_Project_Button" element on "Projects" wizard
-        Then type into "Name_Input" on "Create_New_Project" popup dialog "default" value
+        Then type into "Name_Input" on "Create_New_Project" popup dialog "automation-test-name201" value
         Then click on "Create_Button" element on "Create_New_Project" wizard
         Then "Error_Message" component on "Create_New_Project" should contains "Error_Messages"."Projects_Limit_Reached"
-        And clear backend
