@@ -236,12 +236,11 @@ const generateActionsMenu = (tab, handleDelete) => {
 export const generatePageData = (
   pageTab,
   handleRequestOnExpand,
-  handleRemoveRequestData,
   onDeleteFeatureVector,
   getPopUpTemplate,
   isTablePanelOpen,
   isSelectedItem,
-  isDemoMode
+  isStagingMode
 ) => {
   let data = {
     details: {
@@ -260,14 +259,12 @@ export const generatePageData = (
     data.tableHeaders = featureSetsTableHeaders(isSelectedItem)
     data.filterMenuActionButton = null
     data.handleRequestOnExpand = handleRequestOnExpand
-    data.handleRemoveRequestData = handleRemoveRequestData
   } else if (pageTab === FEATURES_TAB) {
     data.actionsMenu = []
     data.hidePageActionMenu = true
     data.filters = featuresFilters
     data.tableHeaders = generateFeaturesTableHeaders(isTablePanelOpen)
     data.tablePanel = getFeaturesTablePanel()
-    data.handleRemoveRequestData = handleRemoveRequestData
     data.filterMenuActionButton = {
       label: 'Add to feature vector',
       variant: SECONDARY_BUTTON,
@@ -282,12 +279,11 @@ export const generatePageData = (
       FEATURE_VECTORS_TAB,
       onDeleteFeatureVector
     )
-    data.hidePageActionMenu = !isDemoMode
+    data.hidePageActionMenu = !isStagingMode
     data.actionsMenuHeader = createFeatureVectorTitle
     data.filters = featureVectorsFilters
     data.tableHeaders = featureVectorsTableHeaders(isSelectedItem)
     data.handleRequestOnExpand = handleRequestOnExpand
-    data.handleRemoveRequestData = handleRemoveRequestData
     data.details.infoHeaders = featureVectorsInfoHeaders
     data.details.type = FEATURE_VECTORS_TAB
     data.filterMenuActionButton = null
@@ -372,7 +368,7 @@ export const navigateToDetailsPane = (
     featureSets.allData.length > 0
   ) {
     content = featureSets.selectedRowData.content[name] || featureSets.allData
-  } else if (match.params.pageTab === FEATURES_TAB && features.length > 0) {
+  } else if (match.params.pageTab === FEATURES_TAB && features?.length > 0) {
     content = [...features, ...entities]
   } else if (
     match.params.pageTab === FEATURE_VECTORS_TAB &&

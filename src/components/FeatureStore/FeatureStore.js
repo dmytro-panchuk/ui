@@ -46,7 +46,7 @@ import {
   TAG_FILTER_ALL_ITEMS,
   TAG_FILTER_LATEST
 } from '../../constants'
-import { useDemoMode } from '../../hooks/demoMode.hook'
+import { useMode } from '../../hooks/mode.hook'
 import { useOpenPanel } from '../../hooks/openPanel.hook'
 import { useGetTagOptions } from '../../hooks/useGetTagOptions.hook'
 
@@ -91,7 +91,7 @@ const FeatureStore = ({
       : fetchFeatureSetsTags,
     pageData.filters
   )
-  const isDemoMode = useDemoMode()
+  const { isStagingMode } = useMode()
   const openPanelByDefault = useOpenPanel()
   const [content, setContent] = useState([])
   const [selectedItem, setSelectedItem] = useState({})
@@ -402,10 +402,7 @@ const FeatureStore = ({
   ])
 
   useEffect(() => {
-    if (
-      filtersStore.tag === TAG_FILTER_ALL_ITEMS ||
-      filtersStore.tag === TAG_FILTER_LATEST
-    ) {
+    if (filtersStore.tag === TAG_FILTER_ALL_ITEMS) {
       setFilters({ groupBy: GROUP_BY_NAME })
     } else if (filtersStore.groupBy === GROUP_BY_NAME) {
       setFilters({ groupBy: GROUP_BY_NONE })
@@ -419,26 +416,18 @@ const FeatureStore = ({
         ...generatePageData(
           match.params.pageTab,
           handleRequestOnExpand,
-          match.params.pageTab === FEATURE_VECTORS_TAB
-            ? handleRemoveFeatureVector
-            : match.params.pageTab === FEATURES_TAB
-            ? handleRemoveFeature
-            : handleRemoveFeatureSet,
           onDeleteFeatureVector,
           getPopUpTemplate,
           tableStore.isTablePanelOpen,
           !isEveryObjectValueEmpty(selectedItem),
-          isDemoMode
+          isStagingMode
         )
       }
     })
   }, [
     getPopUpTemplate,
-    handleRemoveFeature,
-    handleRemoveFeatureSet,
-    handleRemoveFeatureVector,
     handleRequestOnExpand,
-    isDemoMode,
+    isStagingMode,
     match.params.pageTab,
     onDeleteFeatureVector,
     selectedItem,
@@ -482,29 +471,31 @@ const FeatureStore = ({
   useEffect(() => {
     checkTabIsValid(history, match, selectedItem)
 
-    setPageData(state => {
-      if (match.params.pageTab === FEATURE_SETS_TAB) {
-        return {
-          ...state,
-          details: {
-            ...state.details,
-            menu: [...generateFeatureSetsDetailsMenu(selectedItem)],
-            type: FEATURE_SETS_TAB
+    if (selectedItem.item) {
+      setPageData(state => {
+        if (match.params.pageTab === FEATURE_SETS_TAB) {
+          return {
+            ...state,
+            details: {
+              ...state.details,
+              menu: [...generateFeatureSetsDetailsMenu(selectedItem)],
+              type: FEATURE_SETS_TAB
+            }
+          }
+        } else if (match.params.pageTab === FEATURE_VECTORS_TAB) {
+          return {
+            ...state,
+            details: {
+              ...state.details,
+              menu: [...generateFeatureVectorsDetailsMenu(selectedItem)],
+              type: FEATURE_VECTORS_TAB
+            }
           }
         }
-      } else if (match.params.pageTab === FEATURE_VECTORS_TAB) {
-        return {
-          ...state,
-          details: {
-            ...state.details,
-            menu: [...generateFeatureVectorsDetailsMenu(selectedItem)],
-            type: FEATURE_VECTORS_TAB
-          }
-        }
-      }
 
-      return { ...state }
-    })
+        return { ...state }
+      })
+    }
   }, [
     history,
     selectedItem.item,
@@ -614,6 +605,13 @@ const FeatureStore = ({
         cancelRequest={cancelRequest}
         content={content}
         handleCancel={() => setSelectedItem({})}
+        handleRemoveRequestData={
+          match.params.pageTab === FEATURE_VECTORS_TAB
+            ? handleRemoveFeatureVector
+            : match.params.pageTab === FEATURES_TAB
+            ? handleRemoveFeature
+            : handleRemoveFeatureSet
+        }
         loading={
           featureStore.loading ||
           featureStore.entities.loading ||

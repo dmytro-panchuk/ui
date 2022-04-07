@@ -30,6 +30,10 @@ const FunctionsPanelResources = ({
   setValidation,
   validation
 }) => {
+  const [podsPriorityClassName, setPodsPriorityClassName] = useState(
+    defaultData.priority_class_name ||
+      functionsStore.newFunction.spec.priority_class_name
+  )
   const defaultPodsResources = useMemo(() => {
     return frontendSpec?.default_function_pod_resources
   }, [frontendSpec.default_function_pod_resources])
@@ -89,19 +93,18 @@ const FunctionsPanelResources = ({
 
   useEffect(() => {
     if (mode === PANEL_CREATE_MODE) {
-      setNewFunctionDisableAutoMount(false)
-    }
-  }, [mode, setNewFunctionDisableAutoMount])
-
-  useEffect(() => {
-    if (mode === PANEL_CREATE_MODE) {
       setNewFunctionPriorityClassName(
         frontendSpec.default_function_priority_class_name ?? ''
       )
+      setPodsPriorityClassName(
+        frontendSpec.default_function_priority_class_name ?? ''
+      )
+      setNewFunctionDisableAutoMount(false)
     }
   }, [
     frontendSpec.default_function_priority_class_name,
     mode,
+    setNewFunctionDisableAutoMount,
     setNewFunctionPriorityClassName
   ])
 
@@ -385,6 +388,11 @@ const FunctionsPanelResources = ({
     setValidation(prevState => ({ ...prevState, isGpuLimitValid: isValid }))
   }
 
+  const selectPodsPriorityClassName = value => {
+    setNewFunctionPriorityClassName(value)
+    setPodsPriorityClassName(value)
+  }
+
   return (
     <FunctionsPanelResourcesView
       data={data}
@@ -395,14 +403,11 @@ const FunctionsPanelResources = ({
       handleSelectMemoryUnit={handleSelectMemoryUnit}
       handleSelectVolumeMount={handleSelectVolumeMount}
       mode={mode}
-      priorityClassName={
-        defaultData.priority_class_name ||
-        functionsStore.newFunction.spec.priority_class_name
-      }
+      podsPriorityClassName={podsPriorityClassName}
+      selectPodsPriorityClassName={selectPodsPriorityClassName}
       setCpuValue={setCpuValue}
       setGpuValue={setGpuValue}
       setMemoryValue={setMemoryValue}
-      setNewFunctionPriorityClassName={setNewFunctionPriorityClassName}
       validation={validation}
       validFunctionPriorityClassNames={validFunctionPriorityClassNames}
     />
