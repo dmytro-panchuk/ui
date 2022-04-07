@@ -22,7 +22,6 @@ const ComboboxView = React.forwardRef(
       handleMatchesOptionClick,
       handleSelectOptionOnClick,
       hideSearchInput,
-      inputOnBlur,
       inputOnFocus,
       inputPlaceholder,
       inputValue,
@@ -66,7 +65,7 @@ const ComboboxView = React.forwardRef(
     const { comboboxRef, inputRef } = ref
 
     return (
-      <div className={comboboxClassNames} ref={comboboxRef} tabIndex={0}>
+      <div className={comboboxClassNames} ref={comboboxRef}>
         <Arrow className={iconClassNames} onClick={handleIconClick} />
         <div className={selectClassNames}>
           <div className="combobox-select__header" onClick={handleIconClick}>
@@ -99,7 +98,6 @@ const ComboboxView = React.forwardRef(
         <input
           className="combobox-input"
           disabled={selectValue.id.length === 0}
-          onBlur={inputOnBlur}
           onChange={handleInputOnChange}
           onFocus={inputOnFocus}
           placeholder={inputPlaceholder}

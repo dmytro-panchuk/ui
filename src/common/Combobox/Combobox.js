@@ -87,10 +87,22 @@ const Combobox = ({
       if (comboboxRef.current && !comboboxRef.current.contains(event.target)) {
         if (showSelectDropdown) {
           setShowSelectDropdown(false)
+
+          if (selectValue.id.length === 0 && required) {
+            setIsInvalid(true)
+          }
+
+          onBlur && onBlur(selectValue.id, inputValue)
         }
 
         if (showMatchesDropdown) {
           setShowMatchesDropdown(false)
+
+          if (inputValue.length === 0 && required) {
+            setIsInvalid(true)
+          }
+
+          onBlur && onBlur(selectValue.id, inputValue)
         }
 
         if (searchIsFocused) {
@@ -98,7 +110,15 @@ const Combobox = ({
         }
       }
     },
-    [searchIsFocused, showMatchesDropdown, showSelectDropdown]
+    [
+      inputValue,
+      onBlur,
+      required,
+      searchIsFocused,
+      selectValue.id,
+      showMatchesDropdown,
+      showSelectDropdown
+    ]
   )
 
   useEffect(() => {
@@ -176,11 +196,6 @@ const Combobox = ({
 
     setShowMatchesDropdown(true)
   }
-  const inputOnBlur = event => {
-    if (comboboxRef.current !== event.relatedTarget) {
-      onBlur && onBlur(selectValue.id, inputValue)
-    }
-  }
 
   const handleInputOnChange = event => {
     const target = event.target
@@ -222,7 +237,6 @@ const Combobox = ({
       handleMatchesOptionClick={handleMatchesOptionClick}
       handleSelectOptionOnClick={handleSelectOptionOnClick}
       hideSearchInput={hideSearchInput}
-      inputOnBlur={inputOnBlur}
       inputOnFocus={inputOnFocus}
       inputPlaceholder={inputPlaceholder}
       inputValue={inputValue}
