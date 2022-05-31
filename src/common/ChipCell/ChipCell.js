@@ -5,7 +5,6 @@ import ChipCellView from './ChipCellView'
 
 import { cutChips } from '../../utils/cutChips'
 import { CHIP_OPTIONS } from '../../types'
-import { isEveryObjectValueEmpty } from '../../utils/isEveryObjectValueEmpty'
 
 const ChipCell = ({
   addChip,
@@ -70,7 +69,7 @@ const ChipCell = ({
   }, [showHiddenChips, handleShowElements])
 
   const handleResize = useCallback(() => {
-    if (!isEditMode && !isEveryObjectValueEmpty(chipsSizes)) {
+    if (!isEditMode) {
       const parentSize = chipsCellRef.current?.getBoundingClientRect().width
       let maxLength = 0
       let chipIndex = 0
