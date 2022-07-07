@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useCallback, useRef, useContext } from 'react'
+import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
-import { UNSAFE_NavigationContext as NavigationContext, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { connect, useDispatch } from 'react-redux'
 
 import DetailsView from './DetailsView'
@@ -25,6 +25,7 @@ import {
   renderContent
 } from './details.util'
 import { isEveryObjectValueEmpty } from '../../utils/isEveryObjectValueEmpty'
+import { useBlockHistory } from '../../hooks/useBlockHistory.hook'
 
 import './details.scss'
 
@@ -54,13 +55,12 @@ const Details = ({
   showWarning,
   tab
 }) => {
-  const { navigator } = useContext(NavigationContext)
   const applyChangesRef = useRef()
   const dispatch = useDispatch()
-  let unblockRootChange = useRef()
-  let retryNavigate = useRef()
   const detailsRef = useRef()
   const params = useParams()
+  const { blockHistory, unblockHistory } = useBlockHistory()
+  const [isHistoryBlocked, setIsHistoryBlocked] = useState(false)
 
   const handlePreview = useCallback(() => {
     dispatch(
@@ -169,6 +169,7 @@ const Details = ({
 
       removeInfoContent()
       setChangesData({})
+      setIsHistoryBlocked(false)
     }
   }, [
     pageData.details.type,
@@ -192,6 +193,7 @@ const Details = ({
         document.getElementById('refresh')?.contains(event.target)
       ) {
         handleShowWarning(true)
+        setIsHistoryBlocked(true)
         setRefreshWasHandled(true)
       }
     },
@@ -206,25 +208,25 @@ const Details = ({
     }
   }, [handleRefreshClick])
 
-  const blockRootChange = useCallback(() => {
-    if (!unblockRootChange.current) {
-      unblockRootChange.current = navigator.block(tx => {
-        handleShowWarning(true)
-        retryNavigate.current = tx.retry
-
-        return false
-      })
-    }
-  }, [handleShowWarning, navigator])
+  const onHistoryBlock = useCallback(() => {
+    setIsHistoryBlocked(true)
+    handleShowWarning(true)
+  }, [handleShowWarning])
 
   useEffect(() => {
-    if (detailsStore.changes.counter > 0 && !unblockRootChange.current) {
-      blockRootChange()
-    } else if (detailsStore.changes.counter === 0 && unblockRootChange.current) {
-      unblockRootChange.current()
-      unblockRootChange.current = null
+    if (detailsStore.changes.counter > 0 && !isHistoryBlocked) {
+      blockHistory(onHistoryBlock, detailsStore.showWarning)
+    } else if (detailsStore.changes.counter === 0 && isHistoryBlocked) {
+      unblockHistory(false)
     }
-  })
+  }, [
+    blockHistory,
+    detailsStore.changes.counter,
+    detailsStore.showWarning,
+    isHistoryBlocked,
+    onHistoryBlock,
+    unblockHistory
+  ])
 
   const detailsMenuClick = () => {
     let changesData = {}
@@ -246,26 +248,21 @@ const Details = ({
       })
       setChangesData({ ...changesData })
     }
-
-    if (unblockRootChange.current) {
-      unblockRootChange.current()
-      unblockRootChange.current = null
-    }
   }
 
   const applyChanges = () => {
     applyDetailsChanges(detailsStore.changes).then(() => {
       resetChanges()
-      unblockRootChange.current()
-      unblockRootChange.current = null
+      unblockHistory(false)
+      setIsHistoryBlocked(false)
     })
   }
 
   const cancelChanges = () => {
     if (detailsStore.changes.counter > 0) {
       resetChanges()
-      unblockRootChange.current()
-      unblockRootChange.current = null
+      unblockHistory(false)
+      setIsHistoryBlocked(false)
     }
   }
 
@@ -273,17 +270,14 @@ const Details = ({
     cancelChanges()
     handleShowWarning(false)
 
-    if (unblockRootChange.current) {
-      unblockRootChange.current()
-
-      unblockRootChange.current = null
+    if (isHistoryBlocked) {
+      unblockHistory(true)
+      setIsHistoryBlocked(false)
     }
 
     if (detailsStore.refreshWasHandled) {
       retryRequest(filtersStore)
       setRefreshWasHandled(false)
-    } else {
-      retryNavigate.current()
     }
   }
 
