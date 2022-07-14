@@ -211,6 +211,7 @@ const Details = ({
 
   useEffect(() => {
     if (detailsStore.changes.counter > 0 && !isHistoryBlocked) {
+      setIsHistoryBlocked(true)
       blockHistory(onHistoryBlock, detailsStore.showWarning)
     } else if (detailsStore.changes.counter === 0 && isHistoryBlocked) {
       unblockHistory(false)

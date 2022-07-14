@@ -25,6 +25,7 @@ export const defaultCloseModalHandler = (
         label: 'OK',
         variant: SECONDARY_BUTTON
       },
+      closePopUp: () => onReject && onReject(),
       header: 'Are you sure?',
       message: 'All changes will be lost'
     })

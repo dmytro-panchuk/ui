@@ -7,10 +7,10 @@ export const useBlockHistory = () => {
   const historyRetry = useRef()
 
   const blockHistory = useCallback(
-    (unblockHandler, removeUnblockHandler) => {
+    (unblockHandler, removeUnblockHandler, unblockHistoryPush) => {
       if (!unblock.current) {
         unblock.current = navigator.block(historyContext => {
-          if (historyContext.action === 'PUSH') {
+          if (historyContext.action === 'PUSH' && unblockHistoryPush) {
             unblock.current && unblock.current()
             historyContext.retry()
 

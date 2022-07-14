@@ -2,7 +2,7 @@ import { useBlockHistory } from './useBlockHistory.hook'
 import { useCallback, useEffect, useState } from 'react'
 import { defaultCloseModalHandler } from '../utils/defaultCloseModalHandler'
 
-export const useModalBlockHistory = (closeModal, form) => {
+export const useModalBlockHistory = (closeModal, form, unblockHistoryPush) => {
   const { blockHistory, unblockHistory } = useBlockHistory()
   const [confirmationIsOpened, setConfirmationIsOpened] = useState(false)
 
@@ -29,9 +29,9 @@ export const useModalBlockHistory = (closeModal, form) => {
 
   useEffect(() => {
     if (form) {
-      blockHistory(handleCloseModal, confirmationIsOpened)
+      blockHistory(handleCloseModal, confirmationIsOpened, unblockHistoryPush)
     }
-  }, [confirmationIsOpened, blockHistory, handleCloseModal, form])
+  }, [blockHistory, confirmationIsOpened, form, handleCloseModal, unblockHistoryPush])
 
   return { handleCloseModal }
 }
