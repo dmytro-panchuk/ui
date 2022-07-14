@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { useLocation } from 'react-router-dom'
@@ -28,7 +28,7 @@ const RegisterArtifactModal = ({
 }) => {
   const [initialValues, setInitialValues] = useState({
     description: '',
-    kind: 'general',
+    kind: '',
     key: '',
     target_path: ''
   })
@@ -41,67 +41,65 @@ const RegisterArtifactModal = ({
   const { handleCloseModal } = useModalBlockHistory(onResolve, formRef.current)
 
   useEffect(() => {
-    if (artifactKind !== 'artifact') {
-      setInitialValues(state => ({
-        ...state,
-        kind: artifactKind.toLowerCase()
-      }))
-    }
+    setInitialValues(state => ({
+      ...state,
+      kind: artifactKind !== 'artifact' ? artifactKind.toLowerCase() : 'general'
+    }))
   }, [artifactKind])
 
-  const registerArtifact = useCallback(
-    values => {
-      const uid = uuidv4()
-      const data = {
-        uid,
-        key: values.key,
-        db_key: values.key,
-        tree: uid,
-        target_path: values.target_path,
-        description: values.description,
-        kind: values.kind === 'general' ? '' : values.kind,
-        project: projectName,
-        producer: {
-          kind: 'api',
-          uri: window.location.host
-        }
+  const registerArtifact = values => {
+    const uid = uuidv4()
+    const data = {
+      uid,
+      key: values.key,
+      db_key: values.key,
+      tree: uid,
+      target_path: values.target_path,
+      description: values.description,
+      kind: values.kind === 'general' ? '' : values.kind,
+      project: projectName,
+      producer: {
+        kind: 'api',
+        uri: window.location.host
       }
+    }
 
-      if (values.kind === 'model' && values.target_path.includes('/')) {
-        const path = values.target_path.split(/([^/]*)$/)
+    if (values.kind === 'model' && values.target_path.includes('/')) {
+      const path = values.target_path.split(/([^/]*)$/)
 
-        data.target_path = path[0]
-        data.model_file = path[1]
-      }
+      data.target_path = path[0]
+      data.model_file = path[1]
+    }
 
-      artifactApi
-        .registerArtifact(projectName, data)
-        .then(response => {
-          refresh(filtersStore)
-          setNotification({
-            status: response.status,
-            id: Math.random(),
-            message: `${title} initiated successfully`
-          })
+    return artifactApi
+      .registerArtifact(projectName, data)
+      .then(response => {
+        formRef.current = null
+        refresh(filtersStore)
+        return setNotification({
+          status: response.status,
+          id: Math.random(),
+          message: `${title} initiated successfully`
         })
-        .catch(err => {
-          setNotification({
-            status: 400,
-            id: Math.random(),
-            message: `${title} failed to initiate`,
-            retry: registerArtifact
-          })
+      })
+      .catch(err => {
+        return setNotification({
+          status: 400,
+          id: Math.random(),
+          message: `${title} failed to initiate`,
+          retry: registerArtifact
         })
-        .finally(() => onResolve())
-    },
-    [filtersStore, onResolve, projectName, refresh, setNotification, title]
-  )
+      })
+      .finally(() => {
+        onResolve()
+      })
+  }
 
   const getModalActions = formState => {
     const actions = [
       {
         label: 'Cancel',
-        onClick: () => handleCloseModal(formState),
+        onClick: () => handleCloseModal(),
         variant: TERTIARY_BUTTON
       },
       {
