@@ -164,16 +164,9 @@ const Details = ({
       }
 
       removeInfoContent()
-      setChangesData({})
       setIsHistoryBlocked(false)
     }
-  }, [
-    pageData.details.type,
-    removeInfoContent,
-    removeModelFeatureVector,
-    selectedItem,
-    setChangesData
-  ])
+  }, [pageData.details.type, removeInfoContent, removeModelFeatureVector, selectedItem])
 
   const handleShowWarning = useCallback(
     show => {
@@ -205,7 +198,6 @@ const Details = ({
   }, [handleRefreshClick])
 
   const onHistoryBlock = useCallback(() => {
-    setIsHistoryBlocked(true)
     handleShowWarning(true)
   }, [handleShowWarning])
 
@@ -227,6 +219,7 @@ const Details = ({
 
   const detailsMenuClick = () => {
     let changesData = {}
+    isHistoryBlocked && unblockHistory(false)
 
     if (
       Object.keys(detailsStore.changes.data).some(key => {
@@ -266,15 +259,13 @@ const Details = ({
   const leavePage = () => {
     cancelChanges()
     handleShowWarning(false)
-
-    if (isHistoryBlocked) {
-      unblockHistory(true)
-      setIsHistoryBlocked(false)
-    }
+    setIsHistoryBlocked(false)
 
     if (detailsStore.refreshWasHandled) {
       retryRequest(filtersStore)
       setRefreshWasHandled(false)
+    } else {
+      unblockHistory(true)
     }
   }
 
