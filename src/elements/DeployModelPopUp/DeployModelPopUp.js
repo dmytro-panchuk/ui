@@ -65,7 +65,7 @@ const DeployModelPopUp = ({
     })
   )
   const location = useLocation()
-  const { handleCloseModal } = useModalBlockHistory(onResolve, formRef.current, true)
+  const { handleCloseModal } = useModalBlockHistory(onResolve, formRef.current)
 
   const getTagOptions = useCallback((functionList, selectedFunctionName) => {
     return chain(functionList)

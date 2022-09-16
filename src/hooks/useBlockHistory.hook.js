@@ -26,7 +26,7 @@ export const useBlockHistory = () => {
   const historyRetry = useRef()
 
   const blockHistory = useCallback(
-    (unblockHandler, removeUnblockHandler, unblockHistoryPush) => {
+    (unblockHandler, removeUnblockHandler) => {
       if (!unblock.current) {
         unblock.current = navigator.block(historyContext => {
           historyRetry.current = historyContext.retry

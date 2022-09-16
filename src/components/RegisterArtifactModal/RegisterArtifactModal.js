@@ -58,7 +58,7 @@ const RegisterArtifactModal = ({
     })
   )
   const location = useLocation()
-  const { handleCloseModal } = useModalBlockHistory(onResolve, formRef.current, true)
+  const { handleCloseModal } = useModalBlockHistory(onResolve, formRef.current)
 
   useEffect(() => {
     setInitialValues(state => ({
