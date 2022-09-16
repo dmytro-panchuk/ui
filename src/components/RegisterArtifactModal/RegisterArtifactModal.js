@@ -1,3 +1,22 @@
+/*
+Copyright 2019 Iguazio Systems Ltd.
+
+Licensed under the Apache License, Version 2.0 (the "License") with
+an addition restriction as set forth herein. You may not use this
+file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
+
+In addition, you may not use the software for any purposes that are
+illegal under applicable law, and the grant of the foregoing license
+under the Apache 2.0 license is conditioned upon your compliance with
+such restriction.
+*/
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
@@ -17,6 +36,7 @@ import { useModalBlockHistory } from '../../hooks/useModalBlockHistory.hook'
 import artifactApi from '../../api/artifacts-api'
 
 const RegisterArtifactModal = ({
+  actions,
   artifactKind,
   filtersStore,
   isOpen,
@@ -64,26 +84,20 @@ const RegisterArtifactModal = ({
       }
     }
 
-    if (values.kind === 'model' && values.target_path.includes('/')) {
-      const path = values.target_path.split(/([^/]*)$/)
-
-      data.target_path = path[0]
-      data.model_file = path[1]
-    }
-
     return artifactApi
       .registerArtifact(projectName, data)
       .then(response => {
         formRef.current = null
+
         refresh(filtersStore)
-        return setNotification({
+        setNotification({
           status: response.status,
           id: Math.random(),
           message: `${title} initiated successfully`
         })
       })
       .catch(err => {
-        return setNotification({
+        setNotification({
           status: 400,
           id: Math.random(),
           message: `${title} failed to initiate`,
@@ -96,20 +110,22 @@ const RegisterArtifactModal = ({
   }
 
   const getModalActions = formState => {
-    const actions = [
-      {
-        label: 'Cancel',
-        onClick: () => handleCloseModal(),
-        variant: TERTIARY_BUTTON
-      },
-      {
-        disabled: formState.submitting || (formState.invalid && formState.submitFailed),
-        label: 'Register',
-        onClick: formState.handleSubmit,
-        variant: SECONDARY_BUTTON
-      }
-    ]
-    return actions.map(action => <Button {...action} />)
+    const defaultActions = actions
+      ? actions(formState, handleCloseModal)
+      : [
+          {
+            label: 'Cancel',
+            onClick: () => handleCloseModal(),
+            variant: TERTIARY_BUTTON
+          },
+          {
+            disabled: formState.submitting || (formState.invalid && formState.submitFailed),
+            label: 'Register',
+            onClick: formState.handleSubmit,
+            variant: SECONDARY_BUTTON
+          }
+        ]
+    return defaultActions.map(action => <Button {...action} />)
   }
 
   return (
@@ -120,7 +136,7 @@ const RegisterArtifactModal = ({
             data-testid="register-artifact"
             actions={getModalActions(formState)}
             className="artifact-register-form"
-            location={location.pathname}
+            location={location}
             onClose={handleCloseModal}
             show={isOpen}
             size={MODAL_SM}
@@ -137,15 +153,11 @@ const RegisterArtifactModal = ({
   )
 }
 
-RegisterArtifactModal.defaultProps = {
-  title: ''
-}
-
 RegisterArtifactModal.propTypes = {
   artifactKind: PropTypes.string.isRequired,
   projectName: PropTypes.string.isRequired,
   refresh: PropTypes.func.isRequired,
-  title: PropTypes.string
+  title: PropTypes.string.isRequired
 }
 
 export default connect(

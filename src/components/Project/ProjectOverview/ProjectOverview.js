@@ -1,3 +1,22 @@
+/*
+Copyright 2019 Iguazio Systems Ltd.
+
+Licensed under the Apache License, Version 2.0 (the "License") with
+an addition restriction as set forth herein. You may not use this
+file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License.
+
+In addition, you may not use the software for any purposes that are
+illegal under applicable law, and the grant of the foregoing license
+under the Apache 2.0 license is conditioned upon your compliance with
+such restriction.
+*/
 import React, { useEffect, useMemo, useState } from 'react'
 import { connect } from 'react-redux'
 import { isEmpty } from 'lodash'
@@ -9,13 +28,12 @@ import ProjectAction from '../ProjectAction/ProjectAction'
 import ProjectOverviewTableRow from '../ProjectOverviewTableRow/ProjectOverviewTableRow'
 import { ConfirmDialog, Tooltip, TextTooltipTemplate } from 'igz-controls/components'
 
-import RegisterArtifactPopup from '../../RegisterArtifactPopup/RegisterArtifactPopup'
+import projectActions from '../../../actions/projects'
 
-import projectsAction from '../../../actions/projects'
-
-import { handlePath, getInitialCards } from './ProjectOverview.util'
+import { handleClick, getInitialCards } from './ProjectOverview.util'
 import { handleFetchProjectError } from '../project.utils'
 import { getDateAndTimeByFormat } from '../../../utils/'
+import { openPopUp } from 'igz-controls/utils/common.util'
 
 import { ReactComponent as ArrowIcon } from 'igz-controls/images/arrow.svg'
 
@@ -24,50 +42,14 @@ import './ProjectOverview.scss'
 const ProjectOverview = ({ fetchProject, project }) => {
   const [selectedActionsIndex, setSelectedActionsIndex] = useState(null)
   const [confirmData, setConfirmData] = useState(null)
-  const [modal, setModal] = useState({ isOpen: false, name: '' })
   const params = useParams()
   const navigate = useNavigate()
 
   const cards = useMemo(() => {
-    return params.projectName ? getInitialCards(params.projectName) : {}
-  }, [params])
+    return params.projectName ? getInitialCards(params.projectName, navigate) : {}
+  }, [navigate, params])
 
-  const renderPopupContent = () => {
-    switch (modal.name) {
-      case 'registerdataset':
-        return (
-          <RegisterArtifactPopup
-            artifactKind="dataset"
-            refresh={() => {}}
-            setIsPopupOpen={handleModalToggle}
-            title="Register dataset"
-          />
-        )
-      case 'registerfile':
-        return (
-          <RegisterArtifactPopup
-            artifactKind="artifact"
-            refresh={() => {}}
-            setIsPopupOpen={handleModalToggle}
-            title="Register artifact"
-          />
-        )
-      default:
-        return ''
-    }
-  }
-
-  const handleModalToggle = popupName => {
-    return setModal(prev => {
-      return {
-        ...prev,
-        isOpen: !prev.isOpen,
-        name: !prev.isOpen ? popupName : ''
-      }
-    })
-  }
-
-  const handlePathExecution = handlePath(navigate, handleModalToggle)
+  const handlePathExecution = handleClick(navigate, openPopUp)
 
   const handleActionsViewToggle = index => {
     if (selectedActionsIndex === index) {
@@ -114,7 +96,6 @@ const ProjectOverview = ({ fetchProject, project }) => {
 
   return (
     <div className="project-overview">
-      {modal.isOpen && renderPopupContent()}
       <div className="project-overview__header">
         <div className="project-overview__header-title">
           {project.data.metadata.name}
@@ -181,8 +162,12 @@ const ProjectOverview = ({ fetchProject, project }) => {
               <div className="project-overview-card__bottom">
                 <div className="additional-links">
                   {additionalLinks &&
-                    additionalLinks.map(({ id, label, path }) => (
-                      <span key={id} className="link" onClick={() => handlePathExecution(path)}>
+                    additionalLinks.map(({ id, label, handleClick }) => (
+                      <span
+                        key={id}
+                        className="link"
+                        onClick={() => handlePathExecution(handleClick)}
+                      >
                         {label}
                       </span>
                     ))}
@@ -197,7 +182,7 @@ const ProjectOverview = ({ fetchProject, project }) => {
 }
 
 const actionCreators = {
-  fetchProject: projectsAction.fetchProject
+  fetchProject: projectActions.fetchProject
 }
 
 export default connect(

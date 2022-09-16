@@ -1,3 +1,17 @@
+# Copyright 2019 Iguazio
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 name: Build
 
 on:
@@ -37,13 +51,13 @@ jobs:
       id: git_info
       run: |
         echo "::set-output name=mlrun_commit_hash::$(git rev-parse --short=8 $GITHUB_SHA)"
-        echo "::set-output name=latest_version::$(curl -sf https://pypi.org/pypi/mlrun/json | jq -r '.info.version')"
+        echo "::set-output name=unstable_version_prefix::$(curl https://raw.githubusercontent.com/mlrun/mlrun/${GITHUB_REF##*/}/automation/version/unstable_version_prefix)"
     - name: Set computed versions params
       id: computed_params
       run: |
         echo "::set-output name=mlrun_version::$( \
           input_mlrun_version=${{ github.event.inputs.version }} && \
-          default_mlrun_version=$(echo ${{ steps.git_info.outputs.latest_version }}-${{ steps.git_info.outputs.mlrun_commit_hash }}) && \
+          default_mlrun_version=$(echo ${{ steps.git_info.outputs.unstable_version_prefix }}-${{ steps.git_info.outputs.mlrun_commit_hash }}) && \
           echo ${input_mlrun_version:-`echo $default_mlrun_version`})"
         echo "::set-output name=mlrun_docker_repo::$( \
           input_docker_repo=${{ github.event.inputs.docker_repo }} && \
