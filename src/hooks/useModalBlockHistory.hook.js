@@ -22,7 +22,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { defaultCloseModalHandler } from '../utils/defaultCloseModalHandler'
 import { isEqualValues } from 'igz-controls/utils/form.util'
 
-export const useModalBlockHistory = (closeModal, form, unblockHistoryPush) => {
+export const useModalBlockHistory = (closeModal, form) => {
   const { blockHistory, unblockHistory } = useBlockHistory()
   const [confirmationIsOpened, setConfirmationIsOpened] = useState(false)
 
@@ -55,9 +55,9 @@ export const useModalBlockHistory = (closeModal, form, unblockHistoryPush) => {
 
   useEffect(() => {
     if (form) {
-      blockHistory(handleCloseModal, confirmationIsOpened, unblockHistoryPush)
+      blockHistory(handleCloseModal, confirmationIsOpened)
     }
-  }, [blockHistory, confirmationIsOpened, form, handleCloseModal, unblockHistoryPush])
+  }, [confirmationIsOpened, blockHistory, handleCloseModal, form])
 
   return { handleCloseModal }
 }
