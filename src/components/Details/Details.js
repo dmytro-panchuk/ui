@@ -17,9 +17,9 @@ illegal under applicable law, and the grant of the foregoing license
 under the Apache 2.0 license is conditioned upon your compliance with
 such restriction.
 */
-import React, { useEffect, useMemo, useCallback, useRef, useContext } from 'react'
+import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
-import { UNSAFE_NavigationContext as NavigationContext, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { connect, useDispatch } from 'react-redux'
 
 import DetailsView from './DetailsView'
@@ -44,6 +44,7 @@ import {
   renderContent
 } from './details.util'
 import { isEveryObjectValueEmpty } from '../../utils/isEveryObjectValueEmpty'
+import { useBlockHistory } from '../../hooks/useBlockHistory.hook'
 
 import './details.scss'
 
@@ -73,13 +74,12 @@ const Details = ({
   showWarning,
   tab
 }) => {
-  const { navigator } = useContext(NavigationContext)
   const applyChangesRef = useRef()
   const dispatch = useDispatch()
-  let unblockRootChange = useRef()
-  let retryNavigate = useRef()
   const detailsRef = useRef()
   const params = useParams()
+  const { blockHistory, unblockHistory } = useBlockHistory()
+  const [isHistoryBlocked, setIsHistoryBlocked] = useState(false)
 
   const handlePreview = useCallback(() => {
     dispatch(
@@ -191,15 +191,9 @@ const Details = ({
       }
 
       removeInfoContent()
-      setChangesData({})
+      setIsHistoryBlocked(false)
     }
-  }, [
-    pageData.details.type,
-    removeInfoContent,
-    removeModelFeatureVector,
-    selectedItem,
-    setChangesData
-  ])
+  }, [pageData.details.type, removeInfoContent, removeModelFeatureVector, selectedItem])
 
   const handleShowWarning = useCallback(
     show => {
@@ -215,6 +209,7 @@ const Details = ({
         document.getElementById('refresh')?.contains(event.target)
       ) {
         handleShowWarning(true)
+        setIsHistoryBlocked(true)
         setRefreshWasHandled(true)
       }
     },
@@ -229,28 +224,29 @@ const Details = ({
     }
   }, [handleRefreshClick])
 
-  const blockRootChange = useCallback(() => {
-    if (!unblockRootChange.current) {
-      unblockRootChange.current = navigator.block(tx => {
-        handleShowWarning(true)
-        retryNavigate.current = tx.retry
-
-        return false
-      })
-    }
-  }, [handleShowWarning, navigator])
+  const onHistoryBlock = useCallback(() => {
+    handleShowWarning(true)
+  }, [handleShowWarning])
 
   useEffect(() => {
-    if (detailsStore.changes.counter > 0 && !unblockRootChange.current) {
-      blockRootChange()
-    } else if (detailsStore.changes.counter === 0 && unblockRootChange.current) {
-      unblockRootChange.current()
-      unblockRootChange.current = null
+    if (detailsStore.changes.counter > 0 && !isHistoryBlocked) {
+      setIsHistoryBlocked(true)
+      blockHistory(onHistoryBlock, detailsStore.showWarning)
+    } else if (detailsStore.changes.counter === 0 && isHistoryBlocked) {
+      unblockHistory(false)
     }
-  })
+  }, [
+    blockHistory,
+    detailsStore.changes.counter,
+    detailsStore.showWarning,
+    isHistoryBlocked,
+    onHistoryBlock,
+    unblockHistory
+  ])
 
   const detailsMenuClick = () => {
     let changesData = {}
+    isHistoryBlocked && unblockHistory(false)
 
     if (
       Object.keys(detailsStore.changes.data).some(key => {
@@ -269,44 +265,34 @@ const Details = ({
       })
       setChangesData({ ...changesData })
     }
-
-    if (unblockRootChange.current) {
-      unblockRootChange.current()
-      unblockRootChange.current = null
-    }
   }
 
   const applyChanges = () => {
     applyDetailsChanges(detailsStore.changes).then(() => {
       resetChanges()
-      unblockRootChange.current()
-      unblockRootChange.current = null
+      unblockHistory(false)
+      setIsHistoryBlocked(false)
     })
   }
 
   const cancelChanges = () => {
     if (detailsStore.changes.counter > 0) {
       resetChanges()
-      unblockRootChange.current()
-      unblockRootChange.current = null
+      unblockHistory(false)
+      setIsHistoryBlocked(false)
     }
   }
 
   const leavePage = () => {
     cancelChanges()
     handleShowWarning(false)
-
-    if (unblockRootChange.current) {
-      unblockRootChange.current()
-
-      unblockRootChange.current = null
-    }
+    setIsHistoryBlocked(false)
 
     if (detailsStore.refreshWasHandled) {
       retryRequest(filtersStore)
       setRefreshWasHandled(false)
     } else {
-      retryNavigate.current()
+      unblockHistory(true)
     }
   }
 
