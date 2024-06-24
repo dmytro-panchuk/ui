@@ -90,7 +90,7 @@ function RegisterModelPopUp({ actions, isOpen, onResolve, projectName, refresh }
         formRef.current = null
         refresh(filtersStore)
 
-        return dispatch(
+        dispatch(
           notificationActions.setNotification({
             status: response.status,
             id: Math.random(),
@@ -99,7 +99,7 @@ function RegisterModelPopUp({ actions, isOpen, onResolve, projectName, refresh }
         )
       })
       .catch(() => {
-        return dispatch(
+        dispatch(
           notificationActions.setNotification({
             status: 400,
             id: Math.random(),
